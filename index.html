@@ -125,6 +125,7 @@ body.no-scroll{overflow:hidden}
 .st-b.on i.bol{background:#fff;border-radius:3px}
 .st-top .st-b{height:44px;width:44px;max-width:none;flex:none;font-size:18px;border-radius:12px}
 .st-top .st-b.txt{width:auto;padding:0 14px;flex-direction:row;gap:6px;font-size:15px;font-weight:700}
+@media (max-width:430px){#studio .st-top{gap:5px;padding-left:8px;padding-right:8px}#studio .st-top .st-b{width:40px;height:40px;font-size:17px}#studio .st-top .st-b.txt{width:auto;padding:0 10px;font-size:14px}#studio .st-top .st-tit{min-width:0}}
 .st-grade{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;justify-items:center;align-items:center;max-width:440px;margin:8px auto 0}
 #studio .st-play{width:64px;height:64px;border-radius:50%;border:0;background:#fff;color:#151517;font-size:24px;font-weight:800;box-shadow:0 0 0 4px #ffffff30;display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer;-webkit-tap-highlight-color:transparent}
 #studio .st-play:active{transform:scale(.95)}#studio .st-play:disabled{opacity:.35}
@@ -458,7 +459,7 @@ table.mt td:last-child{border-radius:0 10px 10px 0}
    SOCIAL IMOB 360 PRO v3 — arquivo único, 100% offline
    Dados ficam no aparelho (IndexedDB). Sem servidor, sem custo.
    ========================================================= */
-var APP_VER = '5.4.0';
+var APP_VER = '5.5.0';
 var EDICAO = 'cliente'; // 'anderson' = app do Anderson · 'cliente' = versão de venda (gerada por gerar_pro.py)
 var URL_APP = 'https://social-imob-360.github.io/';
 var DB_NAME = 'SOCIAL_IMOB_PRO_CLIENTE';
@@ -871,7 +872,7 @@ function textosIncompletos(){ return S.conteudos.filter(function(c){ var t = TEM
 function autoAltura(el){ if(!el) return; el.style.height = 'auto'; el.style.height = Math.max(el.scrollHeight + 4, 220) + 'px'; }
 
 /* ================= ESTÚDIO: câmera + teleprompter ================= */
-var EST_PADRAO = {vel:20, fonte:44, espaco:1.5, largura:90, foco:35, espelho:'nenhum', central:false, loop:false, toque:true, contagem:3, camera:'user', qualidade:'1080', posTexto:'pescoco', opacidade:0, pip:'canto', rolarAoGravar:true, luzTexto:90, suave:0, luz:0, focoCam:6, direcoes:true, divisao:50};
+var EST_PADRAO = {vel:20, fonte:44, espaco:1.5, largura:90, foco:35, espelho:'nenhum', central:false, loop:false, toque:true, contagem:3, camera:'user', qualidade:'1080', posTexto:'pescoco', opacidade:0, pip:'canto', rolarAoGravar:true, luzTexto:90, suave:0, luz:0, focoCam:6, direcoes:true, divisao:50, orientacao:'auto'};
 var EST = {modo:null, cam:false, texto:true, rolando:false, pos:0, ultimo:0, stream:null, rec:null, partes:[], gravando:false, inicioRec:0, timer:null, wake:null, conteudo:null, titulo:'', txt:''};
 function cfgEst(){ if(!S.cfg.estudio){ S.cfg.estudio = {}; if((window.innerWidth||800) < 600) S.cfg.estudio.fonte = 30; } Object.keys(EST_PADRAO).forEach(function(k){ if(S.cfg.estudio[k]==null) S.cfg.estudio[k] = EST_PADRAO[k]; }); if(!S.cfg.estudio.t521){ S.cfg.estudio.t521 = true; S.cfg.estudio.suave = 0; if((S.cfg.estudio.luzTexto||80) < 90) S.cfg.estudio.luzTexto = 90; S.cfg.estudio.focoCam = 6; } if(!S.cfg.estudio.t52){ S.cfg.estudio.t52 = true; if(S.cfg.estudio.posTexto==='topo') S.cfg.estudio.posTexto = 'pescoco'; S.cfg.estudio.opacidade = 0; } if(!S.cfg.estudio.t54){ S.cfg.estudio.t54 = true; S.cfg.estudio.posTexto = 'dividida'; } if(!S.cfg.estudio.q42){ if(S.cfg.estudio.qualidade==='720') S.cfg.estudio.qualidade = '1080'; S.cfg.estudio.q42 = true; } return S.cfg.estudio; }
 var QUALI42 = {'720':[1280,720,5000000], '1080':[1920,1080,12000000], '4k':[3840,2160,35000000]};
@@ -907,6 +908,7 @@ function telaEscolha(){
     '<p>Como você quer gravar?</p>'+
     '<div class="st-op" data-st="modoCamera"><b>📷</b><div><h3>Câmera + teleprompter</h3><span>Tela dividida: o texto rola em cima, perto da lente, e você se vê embaixo enquanto grava. Dá para trocar para texto sobre a câmera no botão ◫.</span></div></div>'+
     '<div class="st-op" data-st="modoTele"><b>📜</b><div><h3>Teleprompter</h3><span>Texto rolando em tela preta. A câmera fica disponível embaixo, se você quiser se gravar lendo.</span></div></div>'+
+    (flutSuportado() ? '<div class="st-op" data-st="modoFlut"><b>🪟</b><div><h3>Câmera do aparelho + texto flutuante</h3><span>Como no Elegant: uma janelinha com o roteiro rolando fica por cima da câmera do Samsung. Você grava com a qualidade da câmera nativa (HDR, estabilização) e o vídeo vai para a Galeria.</span></div></div>' : '')+
     '<div class="st-op" data-st="camExterna"><b>📱</b><div><h3>Câmera do aparelho (Nativa ou OpenCamera)</h3><span>Abre o app de câmera do sistema. Ali o texto não aparece por cima; depois o vídeo volta para cá para salvar ou compartilhar.</span></div></div>'+
     '<input type="file" id="stArquivo" accept="video/*" capture="user" hidden></div>';
   ligarEstudio();
@@ -932,6 +934,7 @@ function montarPalco(){
     '</div>'+
     '<div class="st-top st-top-flutua"><button class="st-b txt" data-st="voltar">← Voltar</button><b class="st-tit">'+esc(EST.titulo)+'</b>'+
       '<button class="st-b" data-st="layout" id="stLayout" title="Tela dividida: texto em cima, câmera embaixo">◫</button>'+
+      (flutSuportado() ? '<button class="st-b" data-st="flutuante" title="Texto flutuante sobre a câmera do aparelho">🪟</button>' : '')+
       '<button class="st-b" data-st="camAjuste" title="Luz, zoom e lanterna da câmera" '+(EST.cam?'':'disabled')+'>☀️</button>'+
       '<button class="st-b" data-st="biblioteca" title="Meus roteiros">📚</button><button class="st-b" data-st="ajustes" title="Ajustes">⚙️</button></div>'+
     '<div class="st-bar">'+
@@ -956,6 +959,7 @@ function montarPalco(){
     '<div class="st-sheet" id="stSheet"></div>';
   aplicarEstiloTexto(); preencherTexto(); ligarEstudio(); atualizarTempo();
   var bl = $('#stLayout'); if(bl) bl.classList.toggle('on', emSplit());
+  if(cfgEst().orientacao && cfgEst().orientacao!=='auto') aplicarOrientacao(false);
 }
 function remontarPalco(){ var pos = EST.pos; montarPalco(); EST.pos = pos; posicionar(); if(EST.cam){ if(EST.stream){ var v = $('#stVideo'); v.srcObject = EST.stream; v.play().catch(function(){}); aplicarEstiloTexto(); } else ligarCamera(); } }
 function preencherTexto(){
@@ -1119,6 +1123,7 @@ function folhaAjustes(){
     opc('espelho','Espelho',[['nenhum','Sem espelho'],['horizontal','Horizontal (vidro de teleprompter)'],['vertical','Vertical']])+
     opc('posTexto','Posição do texto com a câmera ligada',[['dividida','Tela dividida: texto em cima, câmera embaixo (recomendado)'],['pescoco','Sobre a câmera, dos olhos para baixo'],['topo','No topo (perto da lente)'],['meio','No meio'],['baixo','Embaixo']])+
     opc('pip','Câmera no modo teleprompter',[['dividida','Tela dividida: texto em cima, câmera embaixo'],['canto','Janela pequena no canto'],['fundo','Tela inteira atrás do texto']])+
+    opc('orientacao','Orientação da tela no Estúdio',[['auto','Automática (gira com o aparelho)'],['retrato','Travar em pé (retrato)'],['paisagem','Travar deitado (paisagem)']])+
     opc('contagem','Contagem antes de gravar',[[0,'Sem contagem'],[3,'3 segundos'],[5,'5 segundos']])+
     opc('camera','Câmera',[['user','Frontal (selfie)'],['environment','Traseira']])+
     opc('qualidade','Qualidade',[['720','HD 720p (arquivo menor)'],['1080','Full HD 1080p (recomendado)'],['4k','4K (se a câmera permitir; arquivo bem maior)']])+
@@ -1131,6 +1136,7 @@ function folhaAjustes(){
     if(k==='luz') aplicarLuz();
     if(k==='pip' || k==='posTexto' || k==='divisao' || k==='espelho') atualizarPalco();
     if(k==='direcoes') preencherTexto();
+    if(k==='orientacao') aplicarOrientacao(true);
     if(k==='espelho'){ var be = $('#stEspelho'); if(be) be.classList.toggle('on', v!=='nenhum'); }
     aplicarEstiloTexto(); posicionar();
     if((k==='camera' || k==='qualidade') && EST.cam && antes!==v && !EST.gravando) ligarCamera();
@@ -1229,11 +1235,133 @@ function salvarNovoRoteiro(){
   else { a = {id:uid('rot'), titulo:tit, texto:txt, rotulo:rot, criadoEm:agora, atualizadoEm:agora}; lst.unshift(a); }
   salvarCfg(); toast('Roteiro salvo ✔'); return a;
 }
+/* v5.5 🪟 Texto flutuante sobre a câmera do aparelho (como a janela flutuante do Elegant).
+   O navegador desacelera a página quando você abre outro app, então o texto não pode ser desenhado ao vivo:
+   o app grava antes um vídeo do roteiro rolando (2× mais rápido, para preparar na metade do tempo)
+   e toca esse vídeo a 0,5× numa janela Picture-in-Picture, que fica por cima da câmera do Samsung. */
+var FLUT_F = 2, FLUT_HOLD = 1.5;
+function flutSuportado(){ try{ return !!(document.pictureInPictureEnabled && window.MediaRecorder && HTMLCanvasElement.prototype.captureStream); }catch(e){ return false; } }
+function flutChave(){ var e = cfgEst(); return [EST.txt, e.vel, e.fonte, e.espaco, e.largura, e.espelho, e.central, e.direcoes, e.frases, e.loop].join('|'); }
+function flutDuracao(){ var mx = maxPos(); return Math.max(5, mx ? mx/pxPorSeg() : infoTempo(textoFala(EST.txt), '').seg || 30); }
+function flutLinhas(cx, larg, fs, e){
+  var t = textoFala(EST.txt || ''); if(e.frases) t = t.replace(/([.!?])\s+(?![^\[]*\])/g, '$1\n\n');
+  var out = [];
+  t.split(/\n{2,}/).forEach(function(par, ip){
+    if(ip) out.push({gap:true});
+    par.split('\n').forEach(function(lin){
+      lin.split(/(\[[^\]]{2,400}\])/).forEach(function(peca){
+        if(!peca.trim()) return;
+        var dir = /^\[.*\]$/.test(peca);
+        if(dir && !e.direcoes) return;
+        var txt = dir ? '🎬 ' + peca.slice(1, -1) : peca.trim(), tam = dir ? Math.round(fs*0.6) : fs;
+        cx.font = (dir ? 'italic 500 ' : '600 ') + tam + 'px Inter, system-ui, sans-serif';
+        var linha = '';
+        txt.split(/\s+/).forEach(function(p){ var tenta = linha ? linha + ' ' + p : p; if(cx.measureText(tenta).width > larg && linha){ out.push({t:linha, dir:dir, fs:tam}); linha = p; } else linha = tenta; });
+        if(linha) out.push({t:linha, dir:dir, fs:tam});
+      });
+    });
+  });
+  return out;
+}
+function gerarFlutuante(){
+  if(!String(EST.txt||'').trim()){ toast('Escolha um roteiro primeiro (📚)'); return; }
+  if(EST.flutGerando) return;
+  var e = cfgEst(), W = 960, H = 540, cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+  var cx = cv.getContext('2d'), fs = Math.round(Math.max(30, Math.min(72, e.fonte * 1.1))), lh = Math.round(fs * (e.espaco || 1.5));
+  var larg = W * 0.92 * (e.largura || 90) / 100, linhas = flutLinhas(cx, larg, fs, e), ys = [], y = 0;
+  linhas.forEach(function(l){ ys.push(y); y += l.gap ? Math.round(lh*0.5) : Math.round((l.fs||fs) * (e.espaco || 1.5)); });
+  var topo = Math.round(H * 0.14), alt = y, dist = alt + H * 0.25, dur = flutDuracao(), vel = dist / dur;
+  var tipos = ['video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm', 'video/mp4'], tipo = tipos.filter(function(t){ try{ return MediaRecorder.isTypeSupported(t); }catch(er){ return false; } })[0];
+  var rec, partes = [], stream = cv.captureStream(60);
+  try{ rec = new MediaRecorder(stream, tipo ? {mimeType:tipo, videoBitsPerSecond:2500000} : {videoBitsPerSecond:2500000}); }catch(er){ toast('Este navegador não grava a janela flutuante'); return; }
+  var desenhar = function(pos){
+    cx.setTransform(1,0,0,1,0,0); cx.fillStyle = '#000'; cx.fillRect(0, 0, W, H);
+    if(e.espelho==='horizontal') cx.setTransform(-1,0,0,1,W,0); else if(e.espelho==='vertical') cx.setTransform(1,0,0,-1,0,H);
+    cx.textBaseline = 'top'; cx.textAlign = e.central ? 'center' : 'left';
+    var x0 = e.central ? W/2 : (W - larg)/2;
+    for(var i=0;i<linhas.length;i++){ var l = linhas[i]; if(l.gap) continue; var yy = topo + ys[i] - pos; if(yy < -lh || yy > H) continue;
+      cx.font = (l.dir ? 'italic 500 ' : '600 ') + l.fs + 'px Inter, system-ui, sans-serif'; cx.fillStyle = l.dir ? '#9fa3ad' : '#fff'; cx.fillText(l.t, x0, yy); }
+    cx.setTransform(1,0,0,1,0,0); cx.fillStyle = '#FF7A45'; cx.beginPath(); cx.moveTo(0, topo - 4); cx.lineTo(14, topo + fs*0.35); cx.lineTo(0, topo + fs*0.7); cx.fill();
+  };
+  EST.flutGerando = true; EST.flutAbortado = false; partes = [];
+  rec.ondataavailable = function(ev){ if(ev.data && ev.data.size) partes.push(ev.data); };
+  rec.onstop = function(){
+    EST.flutGerando = false; stream.getTracks().forEach(function(t){ t.stop(); });
+    if(EST.flutAbortado){ atualizarFolhaFlut(); return; }
+    var blob = new Blob(partes, {type: (rec.mimeType || tipo || 'video/webm').split(';')[0]});
+    if(EST.flut && EST.flut.url) try{ URL.revokeObjectURL(EST.flut.url); }catch(er){}
+    EST.flut = {url:URL.createObjectURL(blob), dur:dur, chave:flutChave(), bytes:blob.size};
+    var v = videoFlut(); v.src = EST.flut.url; v.load();
+    atualizarFolhaFlut(); toast('Janela pronta ✔ Toque em 🪟 Abrir');
+  };
+  var t0 = 0, fim = (FLUT_HOLD + dur) / FLUT_F + 0.4, prog = function(p){ var b = $('#flutBarra'); if(b) b.style.width = Math.round(p*100)+'%'; };
+  var quadro = function(agora){
+    if(!EST.flutGerando) return;
+    if(document.hidden){ EST.flutAbortado = true; try{ rec.stop(); }catch(er){} toast('Fique no app enquanto a janela é preparada'); return; }
+    if(!t0) t0 = agora; var s = (agora - t0) / 1000, tv = s * FLUT_F;
+    desenhar(Math.max(0, Math.min(dist, (tv - FLUT_HOLD) * vel))); prog(Math.min(1, s / fim));
+    if(s >= fim){ try{ rec.stop(); }catch(er){} return; }
+    requestAnimationFrame(quadro);
+  };
+  desenhar(0); rec.start(1000); requestAnimationFrame(quadro); atualizarFolhaFlut();
+}
+function videoFlut(){
+  var v = document.getElementById('stFlutVideo');
+  if(!v){
+    v = document.createElement('video'); v.id = 'stFlutVideo'; v.muted = true; v.playsInline = true; v.setAttribute('playsinline', ''); v.preload = 'auto';
+    v.style.cssText = 'position:fixed;left:0;bottom:0;width:2px;height:2px;opacity:0;pointer-events:none;z-index:-1';
+    document.body.appendChild(v);
+    v.addEventListener('loadedmetadata', function(){ v.defaultPlaybackRate = v.playbackRate = 1 / FLUT_F; if(v.duration === Infinity){ v.currentTime = 1e101; v.addEventListener('timeupdate', function arr(){ v.removeEventListener('timeupdate', arr); v.currentTime = 0; }); } });
+    v.addEventListener('play', function(){ v.playbackRate = 1 / FLUT_F; });
+    v.addEventListener('ended', function(){ if(cfgEst().loop){ v.currentTime = 0; v.play().catch(function(){}); } });
+    v.addEventListener('leavepictureinpicture', function(){ v.pause(); });
+    try{ if(navigator.mediaSession){ navigator.mediaSession.setActionHandler('play', function(){ v.play().catch(function(){}); }); navigator.mediaSession.setActionHandler('pause', function(){ v.pause(); }); navigator.mediaSession.setActionHandler('previoustrack', function(){ v.currentTime = 0; }); } }catch(er){}
+  }
+  return v;
+}
+function abrirFlutuante(){
+  var v = videoFlut();
+  if(!EST.flut){ toast('Prepare a janela primeiro'); return; }
+  pausar();
+  v.currentTime = 0; v.playbackRate = 1 / FLUT_F;
+  v.requestPictureInPicture().then(function(){ toast('Janela aberta: agora abra a câmera do aparelho e toque ▶ na janela'); })
+    .catch(function(err){ toast('O aparelho não abriu a janela flutuante' + (err && err.name==='NotAllowedError' ? ': libere "Picture-in-picture" do Chrome nas configurações do Android' : '')); });
+}
+function atualizarFolhaFlut(){
+  var bx = $('#flutAcoes'); if(!bx) return;
+  var pronto = EST.flut && EST.flut.chave === flutChave(), dur = flutDuracao();
+  if(EST.flutGerando) bx.innerHTML = '<p class="hint">Preparando… fique nesta tela.</p><div style="height:10px;background:#eee;border-radius:6px;overflow:hidden"><div id="flutBarra" style="height:100%;width:0;background:#FF7A45;transition:width .2s"></div></div>';
+  else if(pronto) bx.innerHTML = '<button class="btn acc" data-st="flutAbrir" style="width:100%;font-size:18px;padding:14px">🪟 Abrir janela flutuante</button><p class="hint">Pronta: '+mmss(EST.flut.dur)+' de leitura na velocidade '+cfgEst().vel+'. Mudou velocidade, letra ou roteiro? Prepare de novo.</p><button class="btn" data-st="flutPreparar" style="width:100%">🔄 Preparar de novo</button>';
+  else bx.innerHTML = '<button class="btn acc" data-st="flutPreparar" style="width:100%;font-size:18px;padding:14px">⚙️ Preparar janela (≈ '+mmss(Math.ceil((FLUT_HOLD + dur)/FLUT_F + 1))+')</button>'+(EST.flut ? '<p class="hint">A janela preparada antes é de outra velocidade, letra ou roteiro.</p><button class="btn" data-st="flutAbrir" style="width:100%">🪟 Abrir a anterior mesmo assim</button>' : '');
+  ligarEstudio();
+}
+function folhaFlutuante(){
+  if(!flutSuportado()){ toast('Este navegador não libera janela flutuante. Use a tela dividida (◫).'); return; }
+  if(!String(EST.txt||'').trim()){ toast('Escolha um roteiro primeiro (📚)'); return; }
+  pausar();
+  var sh = $('#stSheet');
+  sh.innerHTML = '<div class="st-aj"><div class="row"><h3 style="flex:1">🪟 Texto flutuante sobre a câmera do aparelho</h3><button class="btn sm" data-st="fecharSheet">Fechar</button></div>'+
+    '<ol class="hint" style="padding-left:18px;line-height:1.55;font-size:14px;color:#444"><li>Toque em <b>Preparar</b>: o app monta o vídeo do texto rolando com a velocidade, letra e espelho de agora.</li><li>Toque em <b>Abrir janela flutuante</b>.</li><li>Abra a câmera do Samsung, arraste a janelinha para perto da lente e aumente com dois dedos.</li><li>Comece a gravar na câmera e toque <b>▶</b> na janela. Tocar na janela mostra pausar e voltar.</li></ol>'+
+    '<div id="flutAcoes"></div><p class="hint">A velocidade fica fixa dentro da janela: para mudar, ajuste aqui e prepare de novo. O vídeo gravado fica na Galeria, como sempre na câmera do aparelho.</p></div>';
+  sh.classList.add('on'); atualizarFolhaFlut();
+}
+function aplicarOrientacao(avisar){
+  var o = cfgEst().orientacao || 'auto', so = screen.orientation;
+  if(!so || !so.lock){ if(avisar && o!=='auto') toast('Este aparelho não deixa o app travar a tela'); return; }
+  if(o === 'auto'){ try{ so.unlock(); }catch(er){} return; }
+  var alvo = o === 'paisagem' ? 'landscape' : 'portrait';
+  so.lock(alvo).catch(function(){
+    var d = document.documentElement;
+    if(!document.fullscreenElement && d.requestFullscreen) d.requestFullscreen().then(function(){ return so.lock(alvo); }).catch(function(){ if(avisar) toast('Para travar a tela, abra o app pelo ícone instalado'); });
+    else if(avisar) toast('Para travar a tela, abra o app pelo ícone instalado');
+  });
+}
 function fecharSheet(){ var sh = $('#stSheet'); if(sh){ sh.classList.remove('on'); sh.innerHTML = ''; } }
 function fecharEstudio(){
   if(EST.gravando && !confirm('Está gravando. Parar e sair? O vídeo será perdido se não salvar.')) return;
   if(EST.gravando){ EST.gravando=false; try{ EST.rec.onstop=null; EST.rec.stop(); }catch(e){} clearInterval(EST.timer); }
   pausar(); pararCamera(); EST.tela = null;
+  try{ if(screen.orientation && screen.orientation.unlock && cfgEst().orientacao!=='auto') screen.orientation.unlock(); }catch(e){}
   try{ if(EST.wake) EST.wake.release(); }catch(e){} EST.wake = null;
   try{ if(document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(function(){}); }catch(e){}
   var st = $('#studio'); st.classList.remove('on'); st.innerHTML = ''; document.body.classList.remove('no-scroll');
@@ -1261,6 +1389,10 @@ function acaoEstudio(a){
       }
       salvarCfg(); break;
     case 'camAjuste': folhaCamera(); break;
+    case 'flutuante': folhaFlutuante(); break;
+    case 'modoFlut': if(!String(EST.txt||'').trim()){ toast('Escolha um roteiro primeiro (📚)'); break; } escolherModo('tele'); setTimeout(folhaFlutuante, 60); break;
+    case 'flutPreparar': gerarFlutuante(); break;
+    case 'flutAbrir': abrirFlutuante(); break;
     case 'bibVoltar': voltarDaBiblioteca(); break;
     case 'bibMenu': var mn = $('#bibMenu'); if(mn.innerHTML){ mn.innerHTML = ''; break; } mn.innerHTML = '<div class="st-fab-menu"><button data-st="bibNovo">📝 Criar novo roteiro</button><button data-st="bibColar">📋 Colar texto</button><button data-st="bibArquivo">📄 Importar arquivo de texto (.txt)</button></div>'; ligarEstudio(); break;
     case 'bibNovo': telaNovoRoteiro(null); break;
