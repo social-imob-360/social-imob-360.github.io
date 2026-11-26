@@ -459,7 +459,7 @@ table.mt td:last-child{border-radius:0 10px 10px 0}
    SOCIAL IMOB 360 PRO v3 — arquivo único, 100% offline
    Dados ficam no aparelho (IndexedDB). Sem servidor, sem custo.
    ========================================================= */
-var APP_VER = '5.5.0';
+var APP_VER = '5.5.1';
 var EDICAO = 'anderson'; // 'anderson' = app do Anderson · 'cliente' = versão de venda (gerada por gerar_pro.py)
 var URL_APP = 'https://social-imob-360.github.io/criador/';
 var DB_NAME = 'SOCIAL_IMOB_360_PRO';
@@ -764,6 +764,11 @@ function prepararInstalacao(){
   if(navigator.storage && navigator.storage.persist){ try{ navigator.storage.persist(); }catch(e){} }
   window.addEventListener('beforeinstallprompt', function(e){ e.preventDefault(); installEvt = e; var b=$('#btnInstalar'); if(b) b.textContent='📲 Instalar app'; });
   window.addEventListener('appinstalled', function(){ installEvt = null; toast('App instalado na tela inicial ✔'); document.body.classList.add('standalone'); });
+  /* v5.5.1: link direto para a tela de instalação — endereço terminado em ?instalar ou #instalar */
+  if(/(^|[?#&])instalar(\b|=|$)/.test(location.search + '#' + location.hash.replace(/^#/,'')) && !modoApp()){
+    var tentaInst = function(n){ var ca = document.getElementById('ca-raiz'); if((ca && ca.classList.contains('ca-on')) || typeof abrirModal!=='function'){ if(n < 600) setTimeout(function(){ tentaInst(n+1); }, 800); return; } try{ telaInstalar(); }catch(e){} };
+    setTimeout(function(){ tentaInst(0); }, 1200);
+  }
 }
 function plataforma(){
   var u = navigator.userAgent || '';
@@ -795,7 +800,10 @@ function telaInstalar(forcarLocal){
   } else if(pl==='ios'){
     h += passo(1,'Abra o app no <b>Safari</b>.')+passo(2,'Toque em <b>Compartilhar</b> (quadrado com seta).')+passo(3,'Toque em <b>Adicionar à Tela de Início</b> → <b>Adicionar</b>.');
   } else if(pl==='pc'){
-    h += passo(1,'No Chrome ou Edge, clique no ícone de <b>instalar</b> na barra de endereço, ou em ⋮ → <b>Transmitir, salvar e compartilhar</b> → <b>Criar atalho</b>.')+passo(2,'Marque <b>Abrir como janela</b> e confirme.')+passo(3,'Ou salve nos favoritos com <b>Ctrl+D</b>.');
+    h += passo(1,'No <b>Chrome</b> ou no <b>Edge</b>, clique no ícone de <b>instalar</b> (monitor com seta ⤓) no fim da barra de endereço → <b>Instalar</b>. Se não aparecer: ⋮ → <b>Transmitir, salvar e compartilhar</b> → <b>Instalar página como app</b>.')+
+      passo(2,'O app abre em janela própria, com o logo, e entra no menu Iniciar.')+
+      passo(3,'<b>Atalho na área de trabalho:</b> no Chrome, abra <b>chrome://apps</b>, clique com o botão direito no Social Imob → <b>Criar atalhos</b> → marque <b>Área de trabalho</b> → <b>Criar</b>. No Edge: ⋯ → <b>Aplicativos</b> → <b>Gerenciar aplicativos</b> → Social Imob → <b>Detalhes</b> → marque <b>Área de trabalho</b>.')+
+      passo(4,'Para fixar na barra de tarefas: clique com o botão direito no ícone aberto → <b>Fixar na barra de tarefas</b>.');
   } else {
     if(!installEvt) h += passo(1,'No Chrome, toque em <b>⋮</b> (canto superior direito).')+passo(2,'Toque em <b>Instalar app</b> (ou <b>Adicionar à tela inicial</b> → <b>Instalar</b>).')+passo(3,'O ícone laranja do Social Imob aparece na tela inicial e abre em tela cheia, como o PROSPECTARION.');
   }
