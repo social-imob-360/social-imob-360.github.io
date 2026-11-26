@@ -1,9 +1,9 @@
-/* SOCIAL IMOB 360 PRO (versão de venda) — funcionamento sem internet.
+/* GRAVAITUBE PRO (versão de venda) — funcionamento sem internet.
    Com internet: busca a versão mais nova e guarda uma cópia.
    Sem internet: abre a última cópia guardada.
    Os dados ficam no aparelho (IndexedDB) e nunca passam por aqui. */
-var CACHE = 'socialimobpro-v5-5-1';
-var ARQUIVOS = ['./', 'index.html', 'manifest.webmanifest', 'icone-v2-192.png', 'icone-v2-512.png', 'icone-v2-maskable-512.png'];
+var CACHE = 'socialimobpro-v6-0-0';
+var ARQUIVOS = ['./', 'index.html', 'manifest.webmanifest', 'icone-g-192.png', 'icone-g-512.png', 'icone-g-maskable-512.png'];
 
 self.addEventListener('install', function (e) {
   e.waitUntil(caches.open(CACHE).then(function (c) { return c.addAll(ARQUIVOS); }).then(function () { return self.skipWaiting(); }));

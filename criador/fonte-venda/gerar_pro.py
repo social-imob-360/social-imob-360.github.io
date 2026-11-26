@@ -44,20 +44,20 @@ cli = open(SP + 'cli50.js', encoding='utf-8').read().replace('__PACKS__', open(S
 rep('/*CLI-AQUI*/', cli)
 
 # cabeçalho
-rep('<meta name="apple-mobile-web-app-title" content="Social Imob">', '<meta name="apple-mobile-web-app-title" content="Social Imob PRO">')
-s = re.sub(r'<title>[^<]*</title>', '<title>Social Imob 360 PRO</title>', s, count=1)
+rep('<meta name="apple-mobile-web-app-title" content="GRAVAITUBE">', '<meta name="apple-mobile-web-app-title" content="GRAVAITUBE PRO">')
+s = re.sub(r'<title>[^<]*</title>', '<title>GRAVAITUBE PRO</title>', s, count=1)
 open(DST + 'index.html', 'w', encoding='utf-8').write(s)
 
 m = json.load(open(SRC + 'manifest.webmanifest', encoding='utf-8'))
-m['name'] = 'Social Imob 360 PRO'; m['short_name'] = 'Social Imob PRO'
+m['name'] = 'GRAVAITUBE PRO'; m['short_name'] = 'GRAVAITUBE PRO'
 m['description'] = 'Calendário, roteiros, estúdio de gravação e conteúdo com IA para profissionais de qualquer área.'
 json.dump(m, open(DST + 'manifest.webmanifest', 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
-for f in ['icone-v2-192.png', 'icone-v2-512.png', 'icone-v2-maskable-512.png']:
+for f in ['icone-g-192.png', 'icone-g-512.png', 'icone-g-maskable-512.png']:
     shutil.copy(SRC + f, DST + f)
 sw = open(SRC + 'sw.js', encoding='utf-8').read()
 sw = re.sub(r"var CACHE = 'socialimob-[^']*';", "var CACHE = 'socialimobpro-v" + ver.replace('.', '-') + "';", sw)
 sw = sw.replace("k.indexOf('socialimob-') === 0", "k.indexOf('socialimobpro-') === 0")
 assert 'socialimobpro-v' in sw and "indexOf('socialimobpro-')" in sw
-sw = sw.replace('SOCIAL IMOB 360 PRO — funcionamento sem internet.', 'SOCIAL IMOB 360 PRO (versão de venda) — funcionamento sem internet.')
+sw = sw.replace('GRAVAITUBE — funcionamento sem internet.', 'GRAVAITUBE PRO (versão de venda) — funcionamento sem internet.')
 open(DST + 'sw.js', 'w', encoding='utf-8').write(sw)
 print('ok', ver, len(s))
