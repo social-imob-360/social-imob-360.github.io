@@ -40,24 +40,45 @@ s = s.replace('(ex.: wa.me/5551984168848)', '(ex.: wa.me/55 + o seu número com 
 # painel do criador fora; módulo do cliente dentro
 s = re.sub(r'/\*CRIADOR-INI\*/[\s\S]*?/\*CRIADOR-FIM\*/\n?', '', s)
 assert 'cardCriador' not in s.split('typeof cardCriador')[0][-50:] or True
-cli = open(SP + 'cli50.js', encoding='utf-8').read().replace('__PACKS__', open(SP + 'packs50.json', encoding='utf-8').read())
+# Social Imob = nicho imobiliário: só corretores, investidores, consórcios e vendas do segmento.
+# (packs50.json guarda todas as profissões, para uma futura versão de venda do GRAVAITUBE.)
+NICHO = ['corretor', 'investidor', 'consorcio', 'vendas', 'outra']
+_pk = json.load(open(SP + 'packs50.json', encoding='utf-8'))
+_pk['packs'] = sorted([x for x in _pk['packs'] if x['k'] in NICHO], key=lambda x: NICHO.index(x['k']))
+for x in _pk['packs']:
+    if x['k'] == 'outra':
+        x['nome'] = 'Outra função no mercado imobiliário'; x['grupo'] = 'Mercado imobiliário'
+        x['regras'] = ['Coloque o seu CRECI ou registro profissional nas publicações, quando tiver.', 'Não prometa aprovação de crédito, contemplação, valorização nem retorno garantido.', 'Fotos e dados de imóveis e clientes só com autorização.']
+        x['hashtags'] = ['#mercadoimobiliario', '#imoveis', '#investimentos']
+    else:
+        x['grupo'] = 'Mercado imobiliário'
+assert [x['k'] for x in _pk['packs']] == NICHO
+cli = open(SP + 'cli50.js', encoding='utf-8').read().replace('__PACKS__', json.dumps(_pk, ensure_ascii=False))
+def crep(a, b):
+    global cli
+    assert cli.count(a) == 1, a[:60]; cli = cli.replace(a, b)
+crep('placeholder="Ex.: dentista especialista em implantes"', 'placeholder="Ex.: corretor especialista em imóveis de alto padrão"')
+crep('placeholder="Ex.: CRO-RS 12345, OAB/RS 9999, CRECI 00000"', 'placeholder="Ex.: CRECI 00000-F, CRECI-J 0000"')
+crep('Qual é a sua profissão? O app monta o calendário e os roteiros a partir dela.', 'Qual é a sua área no mercado imobiliário? O app monta o calendário e os roteiros a partir dela.')
+crep('Temas prontos da sua profissão e temas que servem para qualquer área', 'Temas prontos da sua área e temas gerais do mercado imobiliário')
+crep('Escolha a sua profissão (ou "Outra profissão").', 'Escolha a sua área (ou "Outra função no mercado imobiliário").')
 rep('/*CLI-AQUI*/', cli)
 
 # cabeçalho
-rep('<meta name="apple-mobile-web-app-title" content="GRAVAITUBE">', '<meta name="apple-mobile-web-app-title" content="GRAVAITUBE PRO">')
-s = re.sub(r'<title>[^<]*</title>', '<title>GRAVAITUBE PRO</title>', s, count=1)
+rep('<meta name="apple-mobile-web-app-title" content="Social Imob">', '<meta name="apple-mobile-web-app-title" content="Social Imob PRO">')
+s = re.sub(r'<title>[^<]*</title>', '<title>Social Imob 360 PRO</title>', s, count=1)
 open(DST + 'index.html', 'w', encoding='utf-8').write(s)
 
 m = json.load(open(SRC + 'manifest.webmanifest', encoding='utf-8'))
-m['name'] = 'GRAVAITUBE PRO'; m['short_name'] = 'GRAVAITUBE PRO'
-m['description'] = 'Calendário, roteiros, estúdio de gravação e conteúdo com IA para profissionais de qualquer área.'
+m['name'] = 'Social Imob 360 PRO'; m['short_name'] = 'Social Imob PRO'
+m['description'] = 'Conteúdo para corretores, investidores, consultores de consórcio e equipes de vendas imobiliárias: calendário, roteiros, estúdio de gravação com teleprompter e IA.'
 json.dump(m, open(DST + 'manifest.webmanifest', 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
-for f in ['icone-g-192.png', 'icone-g-512.png', 'icone-g-maskable-512.png']:
+for f in ['icone-v2-192.png', 'icone-v2-512.png', 'icone-v2-maskable-512.png']:
     shutil.copy(SRC + f, DST + f)
 sw = open(SRC + 'sw.js', encoding='utf-8').read()
 sw = re.sub(r"var CACHE = 'socialimob-[^']*';", "var CACHE = 'socialimobpro-v" + ver.replace('.', '-') + "';", sw)
 sw = sw.replace("k.indexOf('socialimob-') === 0", "k.indexOf('socialimobpro-') === 0")
 assert 'socialimobpro-v' in sw and "indexOf('socialimobpro-')" in sw
-sw = sw.replace('GRAVAITUBE — funcionamento sem internet.', 'GRAVAITUBE PRO (versão de venda) — funcionamento sem internet.')
+sw = sw.replace('SOCIAL IMOB 360 PRO — funcionamento sem internet.', 'SOCIAL IMOB 360 PRO (versão de venda) — funcionamento sem internet.')
 open(DST + 'sw.js', 'w', encoding='utf-8').write(sw)
 print('ok', ver, len(s))
